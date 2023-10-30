@@ -19,7 +19,6 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     private final Map<Integer, User> users = new HashMap<>();
-    private final LocalDate NOW = LocalDate.now();
     private int userIdCounter = 0;
 
     @GetMapping
@@ -42,7 +41,7 @@ public class UserController {
          log.warn("Пользователь не создан, поле login указано некорректно");
          throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_LOGIN);
 
-        } else if (user.getBirthday().isAfter(NOW)) {
+        } else if (user.getBirthday().isAfter(LocalDate.now())) {
          log.warn("Пользователь не создан, поле birthday указано некорректно");
          throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_BIRTHDAY);
 
@@ -71,5 +70,4 @@ public class UserController {
     private void increaseId() {
         userIdCounter++;
     }
-
 }
