@@ -16,10 +16,10 @@ import java.util.*;
 public class FilmController {
 
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-    private static final LocalDate MIN_DATA_RELEASE = LocalDate.of(1895,12,28);
+    private static final LocalDate MIN_DATA_RELEASE = LocalDate.of(1895, 12, 28);
     private static final short DESCRIPTION_LIMIT = 200;
 
-    private final Map<Integer,Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
     private int filmIdCounter = 0;
 
     @GetMapping
@@ -60,7 +60,7 @@ public class FilmController {
             log.warn("Информация о фильме не была обновлена, указан некорректный id");
             throw new InvalidFilmModelException(InvalidFilmModelException.INCORRECT_ID);
         }
-        films.put(film.getId(),film);
+        films.put(film.getId(), film);
         log.info("Информация о фильме с id {} успешно обновлена", film.getId());
         return film;
     }

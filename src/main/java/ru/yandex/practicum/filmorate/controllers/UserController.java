@@ -28,32 +28,32 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody User user) {
-    log.info("Запрос на создание пользователя.");
-     if (user.getEmail().isBlank()
-             || user.getEmail().isEmpty()
-             || !user.getEmail().contains("@")) {
-         log.warn("Пользователь не создан, поле email указано некорректно");
-         throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_EMAIL);
+        log.info("Запрос на создание пользователя.");
+        if (user.getEmail().isBlank()
+                || user.getEmail().isEmpty()
+                || !user.getEmail().contains("@")) {
+            log.warn("Пользователь не создан, поле email указано некорректно");
+            throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_EMAIL);
 
         } else if (user.getLogin().isBlank()
-             || user.getLogin().contains(" ")
-             || user.getLogin().isEmpty()) {
-         log.warn("Пользователь не создан, поле login указано некорректно");
-         throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_LOGIN);
+                || user.getLogin().contains(" ")
+                || user.getLogin().isEmpty()) {
+            log.warn("Пользователь не создан, поле login указано некорректно");
+            throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_LOGIN);
 
         } else if (user.getBirthday().isAfter(LocalDate.now())) {
-         log.warn("Пользователь не создан, поле birthday указано некорректно");
-         throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_BIRTHDAY);
+            log.warn("Пользователь не создан, поле birthday указано некорректно");
+            throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_BIRTHDAY);
 
-     }
-     increaseId();
-     user.setId(userIdCounter);
-     if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
-         user.setName(user.getLogin());
-     }
-     users.put(user.getId(), user);
-     log.info("Пользователь с id " + user.getId() + " создан.");
-     return user;
+        }
+        increaseId();
+        user.setId(userIdCounter);
+        if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+        users.put(user.getId(), user);
+        log.info("Пользователь с id " + user.getId() + " создан.");
+        return user;
     }
 
     @PutMapping
