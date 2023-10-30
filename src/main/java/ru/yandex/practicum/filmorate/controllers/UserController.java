@@ -67,6 +67,7 @@ public class UserController {
         users.put(user.getId(), user);
         return user;
     }
+
     private void increaseId() {
         userIdCounter++;
     }
