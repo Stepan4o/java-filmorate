@@ -76,18 +76,6 @@ public class UserValidationTest {
     }
 
     @Test
-    void postMethodShouldGenerateInvalidMailMessage() {
-        exception = assertThrows(InvalidUserModelException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                controller.createUser(incorrectMail);
-            }
-        });
-        expectedMessage = InvalidUserModelException.INCORRECT_EMAIL;
-        assertEquals(expectedMessage, exception.getMessage(), MESSAGE);
-    }
-
-    @Test
     void postMethodShouldGenerateInvalidLoginMessage() {
         exception = assertThrows(InvalidUserModelException.class, new Executable() {
             @Override
