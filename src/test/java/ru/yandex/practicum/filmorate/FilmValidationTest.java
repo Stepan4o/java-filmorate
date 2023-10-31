@@ -140,8 +140,8 @@ public class FilmValidationTest {
             @Override
             public void execute() throws Throwable {
                 controller.createFilm(Film.builder()
-                        .name("FilmName_Fake_Id")
-                        .description("FilmDescr_Fake_Id")
+                        .name("FilmName")
+                        .description("FilmDescr")
                         .releaseDate(VALID_DATE_RELEASE)
                         .duration(VALID_DURATION)
                         .build());
