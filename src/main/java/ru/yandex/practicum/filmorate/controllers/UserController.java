@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.InvalidUserModelException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,32 +28,24 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        log.info("Запрос на создание пользователя.");
-        if (user.getEmail().isBlank()
-                || user.getEmail().isEmpty()
-                || !user.getEmail().contains("@")) {
-            log.warn("Пользователь не создан, поле email указано некорректно");
-            throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_EMAIL);
-
-        } else if (user.getLogin().isBlank()
-                || user.getLogin().contains(" ")
-                || user.getLogin().isEmpty()) {
-            log.warn("Пользователь не создан, поле login указано некорректно");
+    public User createUser(@Valid @RequestBody User user) {
+        if (user.getLogin().isBlank()
+                || user.getLogin().contains(" ")) {
+            log.warn("Пользователь не создан, поле 'login' указано некорректно");
             throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_LOGIN);
 
         } else if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Пользователь не создан, поле birthday указано некорректно");
+            log.warn("Пользователь не создан, поле 'birthday' указано некорректно");
             throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_BIRTHDAY);
 
         }
         increaseId();
         user.setId(userIdCounter);
-        if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         users.put(user.getId(), user);
-        log.info("Пользователь с id " + user.getId() + " создан.");
+        log.info("Пользователь с id {} создан.", user.getId());
         return user;
     }
 

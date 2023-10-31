@@ -29,7 +29,6 @@ public class FilmController {
 
     @PostMapping
     public Film createFilm(@RequestBody Film film) {
-        log.info("Запрос на добавление фильма");
         if (film.getReleaseDate().isBefore(MIN_DATA_RELEASE)) {
             log.warn("Фильм не добавлен, поле 'releaseDate' указано некорректно");
             throw new InvalidFilmModelException(InvalidFilmModelException.INCORRECT_RELEASE_DATE);
