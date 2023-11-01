@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.InvalidFilmModelException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -17,7 +18,6 @@ public class FilmController {
 
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
     private static final LocalDate MIN_DATA_RELEASE = LocalDate.of(1895, 12, 28);
-    private static final short DESCRIPTION_LIMIT = 200;
 
     private final Map<Integer, Film> films = new HashMap<>();
     private int filmIdCounter = 0;
@@ -28,25 +28,12 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film createFilm(@RequestBody Film film) {
+    public Film createFilm(@Valid @RequestBody Film film) {
         if (film.getReleaseDate().isBefore(MIN_DATA_RELEASE)) {
             log.warn("Фильм не добавлен, поле 'releaseDate' указано некорректно");
             throw new InvalidFilmModelException(InvalidFilmModelException.INCORRECT_RELEASE_DATE);
-
-        } else if (film.getDescription().length() > DESCRIPTION_LIMIT) {
-            log.warn("Фильм не добавлен, поле 'description' указано некорректно");
-            throw new InvalidFilmModelException(InvalidFilmModelException.LIMIT_DESCRIPTION);
-
-        } else if (film.getDuration() <= 0) {
-            log.warn("Фильм не добавлен, поле 'duration' указано некорректно");
-            throw new InvalidFilmModelException(InvalidFilmModelException.INCORRECT_DURATION);
-
-        } else if (film.getName().isBlank() || film.getName().isEmpty()) {
-            log.warn("Фильм не добавлен, поле 'name' указано некорректно");
-            throw new InvalidFilmModelException(InvalidFilmModelException.INCORRECT_NAME);
         }
-        increaseId();
-        film.setId(filmIdCounter);
+        film.setId(++filmIdCounter);
         films.put(film.getId(), film);
         log.info("Фильм {}, с id {} создан", film.getName(), film.getId());
         return film;
@@ -64,7 +51,4 @@ public class FilmController {
         return film;
     }
 
-    private void increaseId() {
-        filmIdCounter++;
-    }
 }

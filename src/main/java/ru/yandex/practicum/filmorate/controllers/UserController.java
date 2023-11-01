@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.exceptions.InvalidUserModelException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,18 +28,13 @@ public class UserController {
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        if (user.getLogin().isBlank()
-                || user.getLogin().contains(" ")) {
+
+        if (user.getLogin().contains(" ")) {
             log.warn("Пользователь не создан, поле 'login' указано некорректно");
             throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_LOGIN);
-
-        } else if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Пользователь не создан, поле 'birthday' указано некорректно");
-            throw new InvalidUserModelException(InvalidUserModelException.INCORRECT_BIRTHDAY);
-
         }
-        increaseId();
-        user.setId(userIdCounter);
+
+        user.setId(++userIdCounter);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -61,7 +55,4 @@ public class UserController {
         return user;
     }
 
-    private void increaseId() {
-        userIdCounter++;
-    }
 }

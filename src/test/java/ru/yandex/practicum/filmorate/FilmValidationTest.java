@@ -7,8 +7,13 @@ import ru.yandex.practicum.filmorate.controllers.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.InvalidFilmModelException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,6 +26,8 @@ public class FilmValidationTest {
     private static FilmController controller;
     private static InvalidFilmModelException exception;
     private static String expectedMessage;
+    private static String actualMessage;
+    private static Validator validator;
 
     private static final Film film_1 = Film.builder()
             .name("FilmName_Film_1")
@@ -53,6 +60,8 @@ public class FilmValidationTest {
     @BeforeEach
     void setup() {
         controller = new FilmController();
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
 
     @Test
@@ -69,16 +78,20 @@ public class FilmValidationTest {
     }
 
     @Test
-    void postMethodShouldGenerateInvalidNameMessage() {
-        exception = assertThrows(InvalidFilmModelException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                controller.createFilm(filmEmptyName);
-            }
-        });
+    void filmShouldNotBeAddedWithIncorrectName() {
+        Collection<Film> actualFilms = controller.findAll();
+        assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
+
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(filmEmptyName);
+        for (ConstraintViolation<Film> violation : violations) {
+            actualMessage = violation.getMessage();
+        }
 
         expectedMessage = InvalidFilmModelException.INCORRECT_NAME;
-        assertEquals(expectedMessage, exception.getMessage(), MESSAGE);
+
+        assertEquals(actualMessage, expectedMessage, "Сообщения не совпадают");
+        assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
 
     }
 
@@ -96,15 +109,19 @@ public class FilmValidationTest {
     }
 
     @Test
-    void postMethodShouldGenerateInvalidDurationMessage() {
-        exception = assertThrows(InvalidFilmModelException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                controller.createFilm(filmWithZeroDuration);
-            }
-        });
+    void filmShouldNotBeAddedWithIncorrectDuration() {
+        Collection<Film> actualFilms = controller.findAll();
+        assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(filmWithZeroDuration);
+        for (ConstraintViolation<Film> violation : violations) {
+            actualMessage = violation.getMessage();
+        }
+
         expectedMessage = InvalidFilmModelException.INCORRECT_DURATION;
-        assertEquals(expectedMessage, exception.getMessage(), MESSAGE);
+
+        assertEquals(actualMessage, expectedMessage, "Сообщения не совпадают");
+        assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
 
     }
 
@@ -118,20 +135,25 @@ public class FilmValidationTest {
         }
         String descriptionMoreThenLimit = new String(sb);
 
-        exception = assertThrows(InvalidFilmModelException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                controller.createFilm(Film.builder()
-                        .name("FilmName_Fake_Description")
-                        .description(descriptionMoreThenLimit)
-                        .releaseDate(VALID_DATE_RELEASE)
-                        .duration(VALID_DURATION)
-                        .build());
-            }
-        });
-        expectedMessage = InvalidFilmModelException.LIMIT_DESCRIPTION;
-        assertEquals(expectedMessage, exception.getMessage(), MESSAGE);
+        Film outOfLimitDescription = Film.builder()
+                .name("FilmName_Fake_Description")
+                .description(descriptionMoreThenLimit)
+                .releaseDate(VALID_DATE_RELEASE)
+                .duration(VALID_DURATION)
+                .build();
 
+        Collection<Film> actualFilms = controller.findAll();
+        assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(outOfLimitDescription);
+        for (ConstraintViolation<Film> violation : violations) {
+            actualMessage = violation.getMessage();
+        }
+
+        expectedMessage = InvalidFilmModelException.LIMIT_DESCRIPTION;
+
+        assertEquals(actualMessage, expectedMessage, "Сообщения не совпадают");
+        assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
     }
 
     @Test

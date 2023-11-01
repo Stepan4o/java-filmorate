@@ -2,13 +2,17 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.controllers.UserController;
 import ru.yandex.practicum.filmorate.exceptions.InvalidUserModelException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -19,9 +23,9 @@ public class UserValidationTest {
     private static final String VALID_MAIL = "mail@email.ru";
     private static final String VALID_NAME = "Name";
     private static final String VALID_LOGIN = "Login";
-    private static final String MESSAGE = "Сообщения об ошибке не совпадают";
     private static String expectedMessage;
-    private static InvalidUserModelException exception;
+    private static String actualMessage;
+    private static Validator validator;
 
     private final User validUser = User.builder()
             .name(VALID_NAME)
@@ -34,26 +38,26 @@ public class UserValidationTest {
             .name(VALID_NAME)
             .email(VALID_MAIL)
             .login(VALID_LOGIN)
-            .birthday(LocalDate.of(2025, 10, 10))
+            .birthday(null)
             .build();
 
-    private final User incorrectMail = User.builder()
+    private final User emptyLogin = User.builder()
             .name(VALID_NAME)
-            .email("mail")
-            .login(VALID_LOGIN)
+            .email(VALID_MAIL)
+            .login("")
             .birthday(VALID_BIRTHDAY)
             .build();
 
-    private final User incorrectLogin = User.builder()
+    private final User invalidLogin = User.builder()
             .name(VALID_NAME)
             .email(VALID_MAIL)
-            .login("log in")
+            .login("l o g i n")
             .birthday(VALID_BIRTHDAY)
             .build();
 
-    private final User nullName = User.builder()
-            .name(null)
-            .email(VALID_MAIL)
+    private final User invalidEmail = User.builder()
+            .name(VALID_NAME)
+            .email("invalidEmail")
             .login(VALID_LOGIN)
             .birthday(VALID_BIRTHDAY)
             .build();
@@ -61,6 +65,31 @@ public class UserValidationTest {
     @BeforeEach
     void setup() {
         controller = new UserController();
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
+    @Test
+    void userShouldNotCreatedWithIncorrectEmail() {
+        Collection<User> actualUsers = controller.findAll();
+        assertEquals(0, actualUsers.size(), "Пользователей не должно существовать");
+
+        Set<ConstraintViolation<User>> violations = validator.validate(invalidEmail);
+        for (ConstraintViolation<User> violation : violations) {
+            actualMessage = violation.getMessage();
+        }
+
+        expectedMessage = InvalidUserModelException.INCORRECT_EMAIL;
+
+        assertEquals(actualMessage, expectedMessage, "Сообщения не совпадают");
+        assertEquals(0, actualUsers.size(), "Пользователей не должно существовать");
+
+    }
+
+    @Test
+    void shouldBeThrowExceptionWithIncorrectLogin() {
+        assertThrows(InvalidUserModelException.class,
+                () -> controller.createUser(invalidLogin));
     }
 
     @Test
@@ -76,27 +105,37 @@ public class UserValidationTest {
     }
 
     @Test
-    void postMethodShouldGenerateInvalidLoginMessage() {
-        exception = assertThrows(InvalidUserModelException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                controller.createUser(incorrectLogin);
-            }
-        });
+    void userShouldNotBeCreatedWithEmptyLogin() {
+        Collection<User> actualUsers = controller.findAll();
+        assertEquals(0, actualUsers.size(), "Пользователей не должно существовать");
+
+        Set<ConstraintViolation<User>> violations = validator.validate(emptyLogin);
+        for (ConstraintViolation<User> violation : violations) {
+            actualMessage = violation.getMessage();
+        }
+
         expectedMessage = InvalidUserModelException.INCORRECT_LOGIN;
-        assertEquals(expectedMessage, exception.getMessage(), MESSAGE);
+
+        assertEquals(expectedMessage, actualMessage, "Сообщения не совпадают");
+        assertEquals(0, actualUsers.size(), "Пользователей не должно существовать");
     }
 
     @Test
-    void postMethodShouldGenerateInvalidBirthdayMessage() {
-        exception = assertThrows(InvalidUserModelException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                controller.createUser(incorrectBirthday);
-            }
-        });
+    void userShouldNotBeCreatedWithNullOrFutureBirthday() {
+        Collection<User> actualUsers = controller.findAll();
+        assertEquals(0, actualUsers.size(), "Пользователей не должно существовать");
+
+
+        Set<ConstraintViolation<User>> violations = validator.validate(incorrectBirthday);
+        for (ConstraintViolation<User> violation : violations) {
+            actualMessage = violation.getMessage();
+        }
+
         expectedMessage = InvalidUserModelException.INCORRECT_BIRTHDAY;
-        assertEquals(expectedMessage, exception.getMessage(), MESSAGE);
+
+        assertEquals(actualMessage, expectedMessage, "Сообщения не совпадают");
+        assertEquals(0, actualUsers.size(), "Пользователей не должно существовать");
+
     }
 }
 
