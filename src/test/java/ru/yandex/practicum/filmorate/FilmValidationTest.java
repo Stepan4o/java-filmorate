@@ -3,9 +3,16 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import ru.yandex.practicum.filmorate.controllers.FilmController;
-import ru.yandex.practicum.filmorate.exceptions.InvalidFilmModelException;
+import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -17,17 +24,20 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.yandex.practicum.filmorate.Constant.*;
 
 public class FilmValidationTest {
     private static final LocalDate VALID_DATE_RELEASE = LocalDate.of(2000, 10, 10);
     private static final int VALID_DURATION = 1;
     private static final String MESSAGE = "Сообщения об ошибке не совпадают";
 
-    private static FilmController controller;
-    private static InvalidFilmModelException exception;
+    private static FilmController filmController;
+    private static UserController userController;
     private static String expectedMessage;
     private static String actualMessage;
     private static Validator validator;
+    private final InMemoryUserStorage userStorage = new InMemoryUserStorage();
+    private final InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
 
     private static final Film film_1 = Film.builder()
             .name("FilmName_Film_1")
@@ -57,21 +67,53 @@ public class FilmValidationTest {
             .duration(0)
             .build();
 
+    private static final User user1 = User.builder()
+            .email("oran@mail.ru")
+            .name("Tomas")
+            .login("Tomas99")
+            .birthday(LocalDate.of(1997, 7, 17))
+            .build();
+
+    private static final User user2 = User.builder()
+            .email("oran@mail.com")
+            .name("Tomas")
+            .login("Tomas99")
+            .birthday(LocalDate.of(1997, 7, 17))
+            .build();
+
     @BeforeEach
     void setup() {
-        controller = new FilmController();
+        FilmService filmService = new FilmService(filmStorage, userStorage);
+        filmController = new FilmController(filmService);
+        UserService userService = new UserService(userStorage);
+        userController = new UserController(userService);
+
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }
 
     @Test
+    void fieldLikesShouldBeIncreasesByOneAfterOneLikeAndReducedAfterRemove() {
+        filmController.createFilm(film_1);
+        userController.createUser(user1);
+        assertEquals(0, filmStorage.getFilmById(film_1.getId()).getLikes().size(), "Количество лайков не совпадает");
+
+        filmController.addLike(film_1.getId(), user1.getId());
+        assertEquals(1, filmStorage.getFilmById(film_1.getId()).getLikes().size(), "Лайк не добавлен");
+
+        filmController.removeLike(film_1.getId(), user1.getId());
+        assertEquals(0, filmStorage.getFilmById(film_1.getId()).getLikes().size(), "Лайк не удалён");
+
+    }
+
+    @Test
     void afterCreatedFilmShouldBeAddedInFilmStorage() {
-        Collection<Film> films = controller.findAll();
+        Collection<Film> films = filmController.getFilms();
         assertEquals(0, films.size(), "Фильмов не должно существовать");
 
-        controller.createFilm(film_1);
+        filmController.createFilm(film_1);
 
-        films = controller.findAll();
+        films = filmController.getFilms();
 
         assertEquals(1, films.size(), "Фильм не вернулся");
 
@@ -79,7 +121,7 @@ public class FilmValidationTest {
 
     @Test
     void filmShouldNotBeAddedWithIncorrectName() {
-        Collection<Film> actualFilms = controller.findAll();
+        Collection<Film> actualFilms = filmController.getFilms();
         assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
 
 
@@ -88,7 +130,7 @@ public class FilmValidationTest {
             actualMessage = violation.getMessage();
         }
 
-        expectedMessage = InvalidFilmModelException.INCORRECT_NAME;
+        expectedMessage = INCORRECT_NAME;
 
         assertEquals(actualMessage, expectedMessage, "Сообщения не совпадают");
         assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
@@ -97,20 +139,22 @@ public class FilmValidationTest {
 
     @Test
     void postMethodShouldGenerateInvalidDateTimeReleaseMessage() {
-        exception = assertThrows(InvalidFilmModelException.class, new Executable() {
+        ValidationException exception = assertThrows(ValidationException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                controller.createFilm(filmWithFakeDateRelease);
+                filmController.createFilm(filmWithFakeDateRelease);
             }
         });
-        expectedMessage = InvalidFilmModelException.INCORRECT_RELEASE_DATE;
+        expectedMessage = String.format(INCORRECT_RELEASE_DATE,
+                MIN_DATE_RELEASE.getDayOfMonth(),
+                MIN_DATE_RELEASE.getYear());
         assertEquals(expectedMessage, exception.getMessage(), MESSAGE);
 
     }
 
     @Test
     void filmShouldNotBeAddedWithIncorrectDuration() {
-        Collection<Film> actualFilms = controller.findAll();
+        Collection<Film> actualFilms = filmController.getFilms();
         assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
 
         Set<ConstraintViolation<Film>> violations = validator.validate(filmWithZeroDuration);
@@ -118,7 +162,7 @@ public class FilmValidationTest {
             actualMessage = violation.getMessage();
         }
 
-        expectedMessage = InvalidFilmModelException.INCORRECT_DURATION;
+        expectedMessage = INCORRECT_DURATION;
 
         assertEquals(actualMessage, expectedMessage, "Сообщения не совпадают");
         assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
@@ -142,7 +186,7 @@ public class FilmValidationTest {
                 .duration(VALID_DURATION)
                 .build();
 
-        Collection<Film> actualFilms = controller.findAll();
+        Collection<Film> actualFilms = filmController.getFilms();
         assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
 
         Set<ConstraintViolation<Film>> violations = validator.validate(outOfLimitDescription);
@@ -150,7 +194,7 @@ public class FilmValidationTest {
             actualMessage = violation.getMessage();
         }
 
-        expectedMessage = InvalidFilmModelException.LIMIT_DESCRIPTION;
+        expectedMessage = LIMIT_DESCRIPTION;
 
         assertEquals(actualMessage, expectedMessage, "Сообщения не совпадают");
         assertEquals(0, actualFilms.size(), "Фильмов не должно существовать");
@@ -158,26 +202,27 @@ public class FilmValidationTest {
 
     @Test
     void putMethodShouldGenerateInvalidIdMessage() {
-        exception = assertThrows(InvalidFilmModelException.class, new Executable() {
+        int incorrectId = 9999;
+        NotFoundException exception = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                controller.createFilm(Film.builder()
+                filmController.createFilm(Film.builder()
                         .name("FilmName")
                         .description("FilmDescr")
                         .releaseDate(VALID_DATE_RELEASE)
                         .duration(VALID_DURATION)
                         .build());
-                controller.updateFilm(Film.builder()
+                filmController.updateFilm(Film.builder()
                         .name("NewFilmName")
                         .description("NewFilmDescr")
                         .releaseDate(VALID_DATE_RELEASE)
                         .duration(VALID_DURATION)
-                        .id(9999)
+                        .id(incorrectId)
                         .build());
 
             }
         });
-        expectedMessage = InvalidFilmModelException.INCORRECT_ID;
+        expectedMessage = String.format(FILM_NOT_FOUND, incorrectId);
         assertEquals(expectedMessage, exception.getMessage(), MESSAGE);
     }
 }
