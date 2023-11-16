@@ -17,7 +17,7 @@ import static ru.yandex.practicum.filmorate.Constant.*;
 @Builder
 public class Film {
 
-    private long id;
+    private Long id;
 
     @NotBlank(message = INCORRECT_NAME)
     private final String name;

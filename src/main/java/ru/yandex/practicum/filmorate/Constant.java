@@ -6,17 +6,23 @@ public class Constant {
 
     public static final LocalDate MIN_DATE_RELEASE = LocalDate.of(1895, 12, 28);
 
-    public static final String INCORRECT_NAME = "Фильм не добавлен, название не может быть пустым.";
+    public static final String INCORRECT_NAME = "Поле -> 'name' не может быть пустым.";
 
-    public static final String INCORRECT_DESCRIPTION = "Описание не может быть пустым.";
+    public static final String NULL_ID = "Индентификатор -> 'id' не может быть пустым";
 
-    public static final String LIMIT_DESCRIPTION = "Превышен лимит символов в описании фильма.";
+    public static final String NULL_DATE = "Дата релиза -> 'releaseDate' не может быть пустым.";
 
-    public static final String INCORRECT_DURATION = "Поле не может быть пустым и должно быть положительным.";
+    public static final String INCORRECT_DESCRIPTION = "Описание -> 'description' не может быть пустым.";
 
-    public static final String INCORRECT_EMAIL = "Email заполнено некорректно";
+    public static final String LIMIT_DESCRIPTION = "Превышен лимит символов в описании фильма. Лимит -> 200";
+
+    public static final String INCORRECT_DURATION = "Продолжительность -> 'duration' должно быть положительным числом.";
+
+    public static final String INCORRECT_EMAIL = "Введите корректную почту -> 'email'.";
 
     public static final String ALREADY_EXIST_EMAIL = "Email '%s' занят";
+
+    public static final String ALREADY_EXIST_LOGIN = "login '%s' занят";
 
     public static final String INCORRECT_LOGIN = "Логин не может быть пустым " +
             "или содержать пробелы";

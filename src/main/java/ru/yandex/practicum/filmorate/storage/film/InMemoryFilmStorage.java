@@ -20,7 +20,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById(long id) {
+    public Film getFilmById(Long id) {
         log.info("Фильм с id {} получен", id);
         return getFilms().get(id);
     }
@@ -34,14 +34,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film addLike(long id, long userId) {
+    public Film addLike(Long id, Long userId) {
         getFilms().get(id).getLikes().add(userId);
         log.info("Пользователь с id {} поставил лайк фильму с id {}", userId, id);
         return getFilms().get(id);
     }
 
     @Override
-    public Film removeLike(long id, long userId) {
+    public Film removeLike(Long id, Long userId) {
         getFilms().get(id).getLikes().remove(userId);
         log.info("Пользователь с id {} удалил лайк у фильма с id {}", userId, id);
         return getFilms().get(id);
@@ -58,9 +58,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Film> getPopular(int count) {
         List<Film> filmsList = new ArrayList<>(films.values());
 
-        filmsList.sort((o1, o2) ->
-                -1 * (o1.getLikes().size() - o2.getLikes().size()));
-
-        return filmsList.stream().limit(count).collect(Collectors.toList());
+        return filmsList.stream()
+                .sorted(Comparator.comparingInt(t -> -(t.getLikes().size())))
+                .limit(count)
+                .collect(Collectors.toList());
     }
 }

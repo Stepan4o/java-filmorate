@@ -9,13 +9,13 @@ public interface FilmStorage {
 
     Map<Long, Film> getFilms();
 
-    Film getFilmById(long id);
+    Film getFilmById(Long id);
 
     Film createFilm(Film film);
 
-    Film addLike(long id, long userId);
+    Film addLike(Long id, Long userId);
 
-    Film removeLike(long id, long userId);
+    Film removeLike(Long id, Long userId);
 
     Film updateFilm(Film film);
 

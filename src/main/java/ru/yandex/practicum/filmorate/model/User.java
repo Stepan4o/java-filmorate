@@ -14,7 +14,7 @@ import static ru.yandex.practicum.filmorate.Constant.*;
 @Builder
 public class User {
 
-    private long id;
+    private Long id;
 
     @Email(message = INCORRECT_EMAIL)
     private final String email;

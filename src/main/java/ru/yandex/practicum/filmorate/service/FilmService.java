@@ -32,7 +32,7 @@ public class FilmService {
         return new ArrayList<>(filmStorage.getFilms().values());
     }
 
-    public Film getFilmById(long id) {
+    public Film getFilmById(Long id) {
         checkFilmById(id);
         return filmStorage.getFilmById(id);
     }
@@ -48,13 +48,13 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
-    public Film addLike(long id, long userId) {
+    public Film addLike(Long id, Long userId) {
         checkFilmById(id);
         checkUserById(userId);
         return filmStorage.addLike(id, userId);
     }
 
-    public Film removeLike(long id, long userId) {
+    public Film removeLike(Long id, Long userId) {
         checkFilmById(id);
         checkUserById(userId);
         return filmStorage.removeLike(id, userId);
@@ -65,6 +65,10 @@ public class FilmService {
     }
 
     void checkDataRelease(LocalDate date) {
+        if (date == null) {
+            log.warn(NULL_DATE);
+            throw new NullPointerException(NULL_DATE);
+        }
         if (date.isBefore(MIN_DATE_RELEASE)) {
             log.warn("Указана некоректная дата резила");
             throw new ValidationException(String.format(INCORRECT_RELEASE_DATE,
@@ -73,14 +77,22 @@ public class FilmService {
         }
     }
 
-    void checkFilmById(long id) {
+    void checkFilmById(Long id) {
+        if (id == null) {
+            log.warn(NULL_ID);
+            throw new NullPointerException(NULL_ID);
+        }
         if (!filmStorage.getFilms().containsKey(id)) {
             log.warn(String.format(FILM_NOT_FOUND, id));
             throw new NotFoundException(String.format(FILM_NOT_FOUND, id));
         }
     }
 
-    void checkUserById(long userId) {
+    void checkUserById(Long userId) {
+        if (userId == null) {
+            log.warn(NULL_ID);
+            throw new NullPointerException(NULL_ID);
+        }
         if (!userStorage.getUsers().containsKey(userId)) {
             log.warn(String.format(USER_NOT_FOUND, userId));
             throw new NotFoundException(String.format(USER_NOT_FOUND, userId));

@@ -4,11 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.*;
+
+import static ru.yandex.practicum.filmorate.Constant.NULL_ID;
 
 @Slf4j
 @RestController
@@ -28,7 +31,7 @@ public class FilmController {
     }
 
     @GetMapping("/films/{id}")
-    public Film getFilmById(@PathVariable long id) {
+    public Film getFilmById(@PathVariable Long id) {
         log.info("Запрос GET /films/{}", id);
         return filmService.getFilmById(id);
     }
@@ -42,17 +45,21 @@ public class FilmController {
     @PutMapping("/films")
     public Film updateFilm(@RequestBody Film film) {
         log.info("Запрос PUT /films");
+        if (film.getId() == null) {
+            log.warn(NULL_ID);
+            throw new ValidationException(NULL_ID);
+        }
         return filmService.updateFilm(film);
     }
 
     @PutMapping("/films/{id}/like/{userId}")
-    public Film addLike(@PathVariable long id, @PathVariable long userId) {
+    public Film addLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Запрос PUT /films/{}/like/{}", id, userId);
         return filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/films/{id}/like/{userId}")
-    public Film removeLike(@PathVariable long id, @PathVariable long userId) {
+    public Film removeLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Запрос DELETE /films/{}/like/{}", id, userId);
         return filmService.removeLike(id, userId);
     }

@@ -8,19 +8,19 @@ import java.util.Map;
 public interface UserStorage {
     Map<Long, User> getUsers();
 
-    List<User> getFriendsList(long id);
+    List<User> getFriendsList(Long id);
 
-    List<User> getCommonFriends(long id, long otherId);
+    List<User> getCommonFriends(Long id, Long otherId);
 
-    User getUserById(long id);
+    User getUserById(Long id);
 
     User createUser(User user);
 
     User updateUser(User user);
 
-    User addFriend(long id, long friendId);
+    User addFriend(Long id, Long friendId);
 
-    User removeFriend(long id, long friendId);
+    User removeFriend(Long id, Long friendId);
 
 
 }

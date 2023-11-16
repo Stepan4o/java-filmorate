@@ -22,7 +22,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getFriendsList(long id) {
+    public List<User> getFriendsList(Long id) {
         List<Long> friendsIds = new ArrayList<>(getUsers().get(id).getFriends());
         List<User> friendsList = new ArrayList<>();
         for (Long userId : friendsIds) {
@@ -34,7 +34,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getCommonFriends(long id, long otherId) {
+    public List<User> getCommonFriends(Long id, Long otherId) {
         List<Long> friendsIds = new ArrayList<>(getUsers().get(id).getFriends());
         User otherUser = getUsers().get(otherId);
         List<User> commonFriends = new ArrayList<>();
@@ -48,8 +48,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(long id) {
-        log.info("Пользователь с id {} получен", id);
+    public User getUserById(Long id) {
         return users.get(id);
     }
 
@@ -69,7 +68,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User addFriend(long id, long friendId) {
+    public User addFriend(Long id, Long friendId) {
         users.get(id).getFriends().add(friendId);
         users.get(friendId).getFriends().add(id);
         log.info("Пользователи с id {} и {} теперь друзья", id, friendId);
@@ -77,7 +76,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User removeFriend(long id, long friendId) {
+    public User removeFriend(Long id, Long friendId) {
         users.get(id).getFriends().remove(friendId);
         users.get(friendId).getFriends().remove(id);
         log.info("Пользователи с id {} и {} больше не друзья", id, friendId);

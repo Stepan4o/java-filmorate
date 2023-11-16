@@ -202,7 +202,7 @@ public class FilmValidationTest {
 
     @Test
     void putMethodShouldGenerateInvalidIdMessage() {
-        int incorrectId = 9999;
+        long incorrectId = 9999;
         NotFoundException exception = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws Throwable {

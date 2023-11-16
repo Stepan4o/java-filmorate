@@ -35,37 +35,41 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable long id) {
+    public User getUserById(@PathVariable Long id) {
         log.info("Запрос GET /users/{}", id);
         return userService.getUserById(id);
     }
 
     @PutMapping("/users")
-    public User updateUser(@RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
         log.info("Запрос PUT /users");
+//        if (user.getId() == null || user.getEmail() == null) {
+//            log.warn(NULL_ID);
+//            throw new ValidationException(NULL_ID);
+//        }
         return userService.updateUser(user);
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")
-    public User addFriend(@PathVariable long id, @PathVariable long friendId) {
+    public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Запрос PUT /users/{}/friends/{}", id, friendId);
         return userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/users/{id}/friends/{friendId}")
-    public User removeFriend(@PathVariable long id, @PathVariable long friendId) {
+    public User removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Запрос DELETE /users/{}/friends/{}", id, friendId);
         return userService.removeFriend(id, friendId);
     }
 
     @GetMapping("/users/{id}/friends")
-    public List<User> getFriendsList(@PathVariable long id) {
+    public List<User> getFriendsList(@PathVariable Long id) {
         log.info("Запрос GET /users/{}/friends", id);
         return userService.getFriendsList(id);
     }
 
     @GetMapping("/users/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
+    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
         log.info("Запрос GET /users/{}/friends/common/{}", id, otherId);
         return userService.getCommonFriends(id, otherId);
     }
