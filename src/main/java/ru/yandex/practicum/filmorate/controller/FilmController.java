@@ -4,74 +4,67 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.filmService.FilmDbService;
 
 import javax.validation.Valid;
 import java.util.*;
 
-import static ru.yandex.practicum.filmorate.Constant.NULL_ID;
-
 @Slf4j
 @RestController
+@RequestMapping("/films")
 public class FilmController {
-
-    private final FilmService filmService;
+    private final FilmDbService filmDbService;
 
     @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
+    public FilmController(FilmDbService filmDbService) {
+        this.filmDbService = filmDbService;
     }
 
-    @GetMapping("/films")
-    public List<Film> getFilms() {
+    @GetMapping
+    public List<Film> getAll() {
         log.info("Запрос GET /films");
-        return filmService.getFilms();
+        return filmDbService.getAll();  //проверил
     }
 
-    @GetMapping("/films/{id}")
+    @GetMapping("/{id}")
     public Film getFilmById(@PathVariable Long id) {
         log.info("Запрос GET /films/{}", id);
-        return filmService.getFilmById(id);
+        return filmDbService.getFilmById(id);
     }
 
-    @PostMapping("/films")
-    public Film createFilm(@Valid @RequestBody Film film) {
+    @PostMapping
+    public Film addFilm(@Valid @RequestBody Film film) {
         log.info("Запрос POST /films");
-        return filmService.createFilm(film);
+        return filmDbService.addFilm(film);
     }
 
-    @PutMapping("/films")
+    @PutMapping
     public Film updateFilm(@RequestBody Film film) {
         log.info("Запрос PUT /films");
-        if (film.getId() == null) {
-            log.warn(NULL_ID);
-            throw new ValidationException(NULL_ID);
-        }
-        return filmService.updateFilm(film);
+        return filmDbService.updateFilm(film);
     }
 
-    @PutMapping("/films/{id}/like/{userId}")
-    public Film addLike(@PathVariable Long id, @PathVariable Long userId) {
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Запрос PUT /films/{}/like/{}", id, userId);
-        return filmService.addLike(id, userId);
+        filmDbService.addLike(id, userId);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
-    public Film removeLike(@PathVariable Long id, @PathVariable Long userId) {
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Запрос DELETE /films/{}/like/{}", id, userId);
-        return filmService.removeLike(id, userId);
+        filmDbService.removeLike(id, userId);
     }
 
-    @GetMapping("/films/popular")
+    @GetMapping("/popular")
     public List<Film> getPopular(@RequestParam(defaultValue = "10") int count) {
         log.info("Запрос GET /films/popular?count={}", count);
         if (count <= 0) {
             log.warn("Некоректно указан параметр count");
             throw new IncorrectParameterException("count");
         }
-        return filmService.getPopular(count);
+        return filmDbService.getPopular(count);
     }
 
 }

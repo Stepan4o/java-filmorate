@@ -1,7 +1,8 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.filmService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -17,18 +18,21 @@ import static ru.yandex.practicum.filmorate.Constant.*;
 
 @Slf4j
 @Service
-public class FilmService {
+public class FilmService implements FilmServiceInterface {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(
+            @Qualifier(value = "InMemoryFilmStorage") FilmStorage filmStorage,
+            @Qualifier(value = "InMemoryUserStorage") UserStorage userStorage
+    ) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
 
-    public List<Film> getFilms() {
+    public List<Film> getAll() {
         return new ArrayList<>(filmStorage.getFilms().values());
     }
 
@@ -37,9 +41,9 @@ public class FilmService {
         return filmStorage.getFilmById(id);
     }
 
-    public Film createFilm(Film film) {
+    public Film addFilm(Film film) {
         checkDataRelease(film.getReleaseDate());
-        return filmStorage.createFilm(film);
+        return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
@@ -48,16 +52,16 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
-    public Film addLike(Long id, Long userId) {
+    public void addLike(Long id, Long userId) {
         checkFilmById(id);
         checkUserById(userId);
-        return filmStorage.addLike(id, userId);
+        filmStorage.addLike(id, userId);
     }
 
-    public Film removeLike(Long id, Long userId) {
+    public void removeLike(Long id, Long userId) {
         checkFilmById(id);
         checkUserById(userId);
-        return filmStorage.removeLike(id, userId);
+        filmStorage.removeLike(id, userId);
     }
 
     public List<Film> getPopular(int count) {
@@ -98,6 +102,4 @@ public class FilmService {
             throw new NotFoundException(String.format(USER_NOT_FOUND, userId));
         }
     }
-
-
 }

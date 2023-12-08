@@ -1,7 +1,8 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.userService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.User;
@@ -15,23 +16,23 @@ import java.util.stream.Collectors;
 import static ru.yandex.practicum.filmorate.Constant.*;
 
 @Slf4j
-@Service
-public class UserService {
+@Service("UserService")
+public class UserService implements UserServiceInterface {
 
     private final UserStorage storage;
 
     @Autowired
-    public UserService(UserStorage storage) {
+    public UserService(@Qualifier("InMemoryUserStorage") UserStorage storage) {
         this.storage = storage;
     }
 
-    public User createUser(User user) {
+    public User addUser(User user) {
         checkLogin(user.getLogin());
         checkEmail(user.getEmail());
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        return storage.createUser(user);
+        return storage.addUser(user);
     }
 
     public List<User> getUsers() {
@@ -43,6 +44,11 @@ public class UserService {
         return storage.getUserById(id);
     }
 
+    @Override
+    public List<User> getAll() {
+        return null;
+    }
+
     public User updateUser(User user) {
         checkUserById(user.getId());
         checkEmailToUpdate(user);
@@ -50,20 +56,20 @@ public class UserService {
         return storage.updateUser(user);
     }
 
-    public User addFriend(Long id, Long friendId) {
+    public void addFriend(Long id, Long friendId) {
         checkUserById(id);
         checkUserById(friendId);
         if (id.equals(friendId)) {
             log.warn("id={} попытка добавить себя в друзья", id);
             throw new ValidationException("Невозможно добавить себя в друзья");
         }
-        return storage.addFriend(id, friendId);
+//        return storage.addFriend(id, friendId);
     }
 
-    public User removeFriend(Long id, Long friendId) {
+    public void removeFriend(Long id, Long friendId) {
         checkUserById(id);
         checkUserById(friendId);
-        return storage.removeFriend(id, friendId);
+//        return storage.removeFriend(id, friendId);
     }
 
     public List<User> getFriendsList(Long id) {

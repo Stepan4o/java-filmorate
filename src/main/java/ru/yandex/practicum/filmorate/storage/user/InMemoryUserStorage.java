@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Component
+@Component("InMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
@@ -23,26 +23,26 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> getFriendsList(Long id) {
-        List<Long> friendsIds = new ArrayList<>(getUsers().get(id).getFriends());
+//        List<Long> friendsIds = new ArrayList<>(getUsers().get(id).getFriends());
         List<User> friendsList = new ArrayList<>();
-        for (Long userId : friendsIds) {
-            User friend = getUserById(userId);
-            friendsList.add(friend);
-        }
+//        for (Long userId : friendsIds) {
+//            User friend = getUserById(userId);
+//            friendsList.add(friend);
+//        }
         log.info("Список друзей пользователя с id {} получен", id);
         return friendsList;
     }
 
     @Override
     public List<User> getCommonFriends(Long id, Long otherId) {
-        List<Long> friendsIds = new ArrayList<>(getUsers().get(id).getFriends());
+//        List<Long> friendsIds = new ArrayList<>(getUsers().get(id).getFriends());
         User otherUser = getUsers().get(otherId);
         List<User> commonFriends = new ArrayList<>();
-        for (Long friendId : otherUser.getFriends()) {
-            if (friendsIds.contains(friendId)) {
-                commonFriends.add(getUsers().get(friendId));
-            }
-        }
+//        for (Long friendId : otherUser.getFriends()) {
+//            if (friendsIds.contains(friendId)) {
+//                commonFriends.add(getUsers().get(friendId));
+//            }
+//        }
         log.info("Список общих друзей пользователей с id {} и {} получен", id, otherId);
         return commonFriends;
     }
@@ -53,7 +53,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User createUser(User user) {
+    public User addUser(User user) {
         user.setId(++id);
         users.put(user.getId(), user);
         log.info("Пользователь с id {} создан.", user.getId());
@@ -68,18 +68,23 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User addFriend(Long id, Long friendId) {
-        users.get(id).getFriends().add(friendId);
-        users.get(friendId).getFriends().add(id);
+    public void addFriend(Long id, Long friendId) {
+//        users.get(id).getFriends().add(friendId);
+//        users.get(friendId).getFriends().add(id);
         log.info("Пользователи с id {} и {} теперь друзья", id, friendId);
-        return users.get(id);
+        users.get(id);
     }
 
     @Override
-    public User removeFriend(Long id, Long friendId) {
-        users.get(id).getFriends().remove(friendId);
-        users.get(friendId).getFriends().remove(id);
+    public void removeFriend(Long id, Long friendId) {
+//        users.get(id).getFriends().remove(friendId);
+//        users.get(friendId).getFriends().remove(id);
         log.info("Пользователи с id {} и {} больше не друзья", id, friendId);
-        return users.get(id);
+        users.get(id);
+    }
+
+    @Override
+    public List<User> getAll() {
+        return null;
     }
 }
