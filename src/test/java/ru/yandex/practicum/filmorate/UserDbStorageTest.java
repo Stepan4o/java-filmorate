@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.dao.UserDbStorage;
 
@@ -15,10 +16,10 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.yandex.practicum.filmorate.Constant.CREATE_TABLES_FOR_USER_TEST;
-import static ru.yandex.practicum.filmorate.Constant.DROP_ALL_TABLES;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
 
 @JdbcTest
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
@@ -59,8 +60,6 @@ public class UserDbStorageTest {
 
     @BeforeEach
     public void setUpDb() {
-        String sql = DROP_ALL_TABLES + CREATE_TABLES_FOR_USER_TEST;
-        jdbcTemplate.update(sql);
         userStorage = new UserDbStorage(jdbcTemplate);
 
         userStorage.addUser(user1);
@@ -170,5 +169,4 @@ public class UserDbStorageTest {
                 "Неверное количство пользователей"
         );
     }
-
 }

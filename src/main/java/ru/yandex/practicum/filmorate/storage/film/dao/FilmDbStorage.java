@@ -40,9 +40,7 @@ public class FilmDbStorage implements FilmStorage {
         Film film = rowToFilm(rowSet);
         log.info("Найден фильм с id {}", id);
         return film;
-
     }
-
 
     @Override
     public List<Film> getAll() {
@@ -65,12 +63,10 @@ public class FilmDbStorage implements FilmStorage {
         film.setId((long) insert.executeAndReturnKey(film.filmToMap()).intValue());
 
         if (film.getGenres() == null) {
-            delGenresFromFilmsTable(film.getId());
             film.setGenres(new ArrayList<>());
             log.info("Фильм с id {} добавлен", film.getId());
             return film;
         } else {
-            delGenresFromFilmsTable(film.getId());
             List<Genre> genres = new ArrayList<>(film.getGenres());
             List<Integer> genreIds = new ArrayList<>();
             for (Genre genre : genres) {
@@ -87,7 +83,6 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "delete from film_genre where film_id_fk = ?";
         jdbcTemplate.update(sql, filmId);
     }
-
 
     @Override
     public void addLike(Long id, Long userId) {
@@ -196,7 +191,6 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
     }
 
-
     private void dateReleaseValidation(LocalDate releaseDate) {
         if (releaseDate.isBefore(MIN_DATE_RELEASE)) {
             throw new ValidationException(String.format(INCORRECT_RELEASE_DATE,
@@ -209,12 +203,8 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "select * from " + table + " where " + str_id + " = ?";
 
         if (!jdbcTemplate.queryForRowSet(sql, id).next()) {
-            throw new NotFoundException("Не найдено по айди");
+            log.error(String.format(FILM_NOT_FOUND, id));
+            throw new NotFoundException(String.format(FILM_NOT_FOUND, id));
         }
-    }
-
-    @Override
-    public Map<Long, Film> getFilms() {
-        return null;
     }
 }

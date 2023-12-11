@@ -142,11 +142,6 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sql, id, friendId);
     }
 
-    @Override
-    public Map<Long, User> getUsers() {
-        return null;
-    }
-
     private void isExistId(String table, String str_id, Long id) {
         String sql = "select * from " + table + " where " + str_id + " = ?";
 

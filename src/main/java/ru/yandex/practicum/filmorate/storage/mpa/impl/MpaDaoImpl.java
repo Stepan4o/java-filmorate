@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.mpa.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaDao;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
 public class MpaDaoImpl implements MpaDao {
 
@@ -21,19 +23,17 @@ public class MpaDaoImpl implements MpaDao {
 
     @Override
     public Mpa getMpaById(int id) {
+        isExist(id);
         String sql = "select * from mpa where mpa_id = ?";
 
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, id);
-        if (rowSet.next()) {
-            int mpaId = rowSet.getInt("mpa_id");
-            String mpaName = rowSet.getString("mpa_name");
-            return Mpa.builder()
-                    .id(mpaId)
-                    .name(mpaName)
-                    .build();
-        } else {
-            throw new NotFoundException(String.format("MPA с id %d не найден", id));
-        }
+        rowSet.next();
+        int mpaId = rowSet.getInt("mpa_id");
+        String mpaName = rowSet.getString("mpa_name");
+        return Mpa.builder()
+                .id(mpaId)
+                .name(mpaName)
+                .build();
     }
 
     @Override
@@ -56,5 +56,13 @@ public class MpaDaoImpl implements MpaDao {
                 .id(id)
                 .name(name)
                 .build();
+    }
+
+    private void isExist(int id) {
+        String sql = "select * from mpa where mpa_id = ?";
+        if (!jdbcTemplate.queryForRowSet(sql, id).next()) {
+            log.error("Рейтинг с id {} не найден", id);
+            throw new NotFoundException(String.format("Рейтинг с id %d не найден", id));
+        }
     }
 }

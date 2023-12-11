@@ -6,16 +6,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.impl.GenreDaoImpl;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.yandex.practicum.filmorate.Constant.CREATE_TABLE_FOR_GENRE_TEST;
-import static ru.yandex.practicum.filmorate.Constant.DROP_ALL_TABLES;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
 
 @JdbcTest
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class GenreDaoImpTest {
     private final JdbcTemplate jdbcTemplate;
@@ -36,8 +37,6 @@ public class GenreDaoImpTest {
 
     @BeforeEach
     public void setUpDb() {
-        String sql = DROP_ALL_TABLES + CREATE_TABLE_FOR_GENRE_TEST;
-        jdbcTemplate.update(sql);
         genreDao = new GenreDaoImpl(jdbcTemplate);
     }
 
@@ -83,5 +82,4 @@ public class GenreDaoImpTest {
                         "Ожидалось -> 'Боевик'")
         );
     }
-
 }

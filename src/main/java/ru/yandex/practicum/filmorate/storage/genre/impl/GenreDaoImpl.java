@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.genre.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.genre.GenreDao;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
 public class GenreDaoImpl implements GenreDao {
 
@@ -21,14 +23,12 @@ public class GenreDaoImpl implements GenreDao {
 
     @Override
     public Genre getGenreById(int id) {
+        isExist(id);
         String sql = "select * from genre where genre_id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, id);
 
-        if (rowSet.next()) {
-            return rowToGenre(rowSet);
-        } else {
-            throw new NotFoundException(String.format("Жанр с id %d не найден", id));
-        }
+        rowSet.next();
+        return rowToGenre(rowSet);
     }
 
     @Override
@@ -64,5 +64,13 @@ public class GenreDaoImpl implements GenreDao {
                 .id(genreId)
                 .name(name)
                 .build();
+    }
+
+    private void isExist(int id) {
+        String sql = "select * from genre where genre_id = ?";
+        if (!jdbcTemplate.queryForRowSet(sql, id).next()) {
+            log.error("Жанр с id {} не найден", id);
+            throw new NotFoundException(String.format("Жанр с id %d не найден", id));
+        }
     }
 }

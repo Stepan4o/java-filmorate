@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.mpa.impl.MpaDaoImpl;
 
@@ -13,10 +14,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.yandex.practicum.filmorate.Constant.CREATE_TABLE_FOR_MPA_TEST;
-import static ru.yandex.practicum.filmorate.Constant.DROP_ALL_TABLES;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
 
 @JdbcTest
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class MpaDaoImplTest {
     private final JdbcTemplate jdbcTemplate;
@@ -27,11 +28,8 @@ public class MpaDaoImplTest {
     private final Mpa mpaR = Mpa.builder().id(4).name("R").build();
     private final Mpa mpaNC17 = Mpa.builder().id(5).name("NC-17").build();
 
-
     @BeforeEach
     public void setUpDb() {
-        String sql = DROP_ALL_TABLES + CREATE_TABLE_FOR_MPA_TEST;
-        jdbcTemplate.update(sql);
         mpaDao = new MpaDaoImpl(jdbcTemplate);
     }
 
@@ -68,7 +66,6 @@ public class MpaDaoImplTest {
                         "Ожидался рейтинг -> 'R'"),
                 () -> assertEquals(expectingListOfMpa.get(4), actualListOfMpa.get(4),
                         "Ожидался рейтинг -> 'NC-17'")
-
         );
     }
 }

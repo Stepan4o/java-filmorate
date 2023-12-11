@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -21,9 +22,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static ru.yandex.practicum.filmorate.Constant.*;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
 
 @JdbcTest
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
@@ -74,8 +76,6 @@ public class FilmDbStorageTest {
 
     @BeforeEach
     public void setUpDb() {
-        String sql = DROP_ALL_TABLES + CREATE_TABLES_FOR_FILMS_TEST;
-        jdbcTemplate.update(sql);
         GenreDao genreDao = new GenreDaoImpl(jdbcTemplate);
         GenreDbService genreDbService = new GenreDbService(genreDao);
         filmStorage = new FilmDbStorage(jdbcTemplate, genreDbService);
@@ -130,7 +130,6 @@ public class FilmDbStorageTest {
 
     @Test
     public void getPopularFilmTest() {
-        jdbcTemplate.update(CREATE_TABLE_FOR_LIKE_TEST);
         UserDbStorage userDbStorage = new UserDbStorage(jdbcTemplate);
 
         User firstUser = User.builder()
@@ -151,7 +150,6 @@ public class FilmDbStorageTest {
         filmStorage.removeLike(secondFilm.getId(), firstUser.getId());
         actualPopularFilmList = filmStorage.getPopular(1);
         actualPopularFilm = actualPopularFilmList.get(0);
-
 
         Assertions.assertNotEquals(secondFilm, actualPopularFilm, "Популярным должен быть не secondFilm");
 
