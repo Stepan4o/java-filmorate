@@ -5,8 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static ru.yandex.practicum.filmorate.Constant.*;
 
@@ -28,6 +27,15 @@ public class User {
     @PastOrPresent(message = INCORRECT_BIRTHDAY)
     private final LocalDate birthday;
 
-    private final Set<Long> friends = new HashSet<>();
+    public Map<String, Object> userToMap() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("user_id", getId());
+        result.put("user_name", getName());
+        result.put("email", getEmail());
+        result.put("login", getLogin());
+        result.put("birthday", getBirthday());
+
+        return result;
+    }
 
 }
